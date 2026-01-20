@@ -257,7 +257,7 @@ function Lycoris.init()
 		local qot = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport) or (getgenv and getgenv().queue_on_teleport)
 		
 		if Lycoris.teleportPersistence and qot and not Lycoris.queued then
-			local loader = 'repeat task.wait() until game:IsLoaded(); loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()'
+			local loader = 'repeat task.wait() until game:IsLoaded(); task.wait(4); loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()'
 			
 			qot(loader)
 			Lycoris.queued = true
