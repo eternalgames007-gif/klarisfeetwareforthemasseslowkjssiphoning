@@ -1031,6 +1031,8 @@ return LPH_NO_VIRTUALIZE(function()
 		AccentColor = Color3.fromRGB(0, 85, 255),
 		OutlineColor = Color3.fromRGB(50, 50, 50),
 		RiskColor = Color3.fromRGB(255, 50, 50),
+		-- ActiveKeybindColor = Color3.fromRGB(0, 85, 255),
+		-- WatermarkColor = Color3.fromRGB(0, 85, 255),
 
 		Black = Color3.new(0, 0, 0),
 		Font = Font.fromEnum(Enum.Font.RobotoMono),
@@ -2449,9 +2451,9 @@ return LPH_NO_VIRTUALIZE(function()
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 
 				ContainerLabel.Visible = State
-				ContainerLabel.TextColor3 = Library.AccentColor
+				ContainerLabel.TextColor3 = Library.AccentColor -- Library.ActiveKeybindColor
 
-				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = "AccentColor"
+				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = "AccentColor" -- "ActiveKeybindColor"
 
 				local YSize = 0
 				local XSize = 0
@@ -4306,7 +4308,7 @@ return LPH_NO_VIRTUALIZE(function()
 		local WatermarkLabel = Library:CreateLabel({
 			Position = UDim2.new(0, 5, 0, 1),
 			Size = UDim2.new(1, -4, 1, 0),
-			TextColor3 = Library.AccentColor,
+			TextColor3 = Library.AccentColor, -- Library.WatermarkColor,
 			TextSize = 14,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			ZIndex = 203,
@@ -4314,7 +4316,7 @@ return LPH_NO_VIRTUALIZE(function()
 		})
 
 		Library:AddToRegistry(WatermarkLabel, {
-			TextColor3 = "AccentColor",
+			TextColor3 = "AccentColor", -- "WatermarkColor",
 		}, true)
 
 		Library.Watermark = WatermarkOuter
@@ -74371,7 +74373,15 @@ return LPH_NO_VIRTUALIZE(function()
 
 		function ThemeManager:ThemeUpdate()
 			-- This allows us to force apply themes without loading the themes tab :)
-			local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+			local options = {
+				"FontColor",
+				"MainColor",
+				"AccentColor",
+				"BackgroundColor",
+				"OutlineColor",
+				-- "ActiveKeybindColor",
+				-- "WatermarkColor",
+			}
 			for i, field in next, options do
 				if Options and Options[field] then
 					self.Library[field] = Options[field].Value
@@ -74417,6 +74427,10 @@ return LPH_NO_VIRTUALIZE(function()
 			groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.AccentColor })
 			groupbox:AddLabel("Outline color"):AddColorPicker("OutlineColor", { Default = self.Library.OutlineColor })
 			groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.FontColor })
+			-- groupbox
+			-- 	:AddLabel("Active keybind color")
+			-- 	:AddColorPicker("ActiveKeybindColor", { Default = self.Library.ActiveKeybindColor })
+			-- groupbox:AddLabel("Watermark color"):AddColorPicker("WatermarkColor", { Default = self.Library.WatermarkColor })
 
 			local ThemesArray = {}
 			for Name, Theme in next, self.BuiltInThemes do
@@ -74486,6 +74500,8 @@ return LPH_NO_VIRTUALIZE(function()
 			Options.AccentColor:OnChanged(UpdateTheme)
 			Options.OutlineColor:OnChanged(UpdateTheme)
 			Options.FontColor:OnChanged(UpdateTheme)
+			-- Options.ActiveKeybindColor:OnChanged(UpdateTheme)
+			-- Options.WatermarkColor:OnChanged(UpdateTheme)
 		end
 
 		function ThemeManager:GetCustomTheme(file)
@@ -74510,7 +74526,15 @@ return LPH_NO_VIRTUALIZE(function()
 			end
 
 			local theme = {}
-			local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+			local fields = {
+				"FontColor",
+				"MainColor",
+				"AccentColor",
+				"BackgroundColor",
+				"OutlineColor",
+				-- "ActiveKeybindColor",
+				-- "WatermarkColor",
+			}
 
 			for _, field in next, fields do
 				local option = Options[field]
