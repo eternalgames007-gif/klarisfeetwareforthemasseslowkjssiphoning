@@ -252,10 +252,21 @@ function Lycoris.init()
 		Lycoris.teleportPersistence = true
 	end
 
-	if Lycoris.teleportPersistence and queue_on_teleport then
-		queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()')
-		Logger.warn("Script has been queued for next teleport.")
+	---Handle teleport persistence.
+	function Lycoris.handleTeleport()
+		local qot = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport) or (getgenv and getgenv().queue_on_teleport)
+		
+		if Lycoris.teleportPersistence and qot and not Lycoris.queued then
+			local loader = 'repeat task.wait() until game:IsLoaded(); loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()'
+			
+			qot(loader)
+			Lycoris.queued = true
+			
+			Logger.warn("Script has been queued for next teleport.")
+		end
 	end
+
+	Lycoris.handleTeleport()
 	--
 
 	if game.PlaceId == CHIME_LOBBY_PLACE_ID or game.PlaceId == LOBBY_PLACE_ID then
@@ -73780,6 +73791,7 @@ function LycorisTab.initCheatSettingsSection(groupbox)
 
 		if shared.Lycoris.teleportPersistence then
 			Logger.notify("Teleport persistence was enabled.")
+			shared.Lycoris.handleTeleport()
 		else
 			Logger.notify("Teleport persistence was disabled.")
 		end
