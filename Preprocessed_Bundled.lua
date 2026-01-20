@@ -40,7 +40,7 @@ local __bundle_require, __bundle_loaded, __bundle_register, __bundle_modules = (
 	end
 
 	return require, loaded, register, modules
-end)(nil)
+end)(require)
 __bundle_register("__root", function(require, _LOADED, __bundle_register, __bundle_modules)
 -- Check for table that is shared between executions.
 if not shared then
@@ -2449,7 +2449,7 @@ return LPH_NO_VIRTUALIZE(function()
 
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 
-				ContainerLabel.Visible = State
+				ContainerLabel.Visible = true
 				ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
 
 				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
