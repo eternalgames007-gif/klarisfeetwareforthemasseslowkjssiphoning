@@ -77,6 +77,7 @@ local function initializeScript()
 
 		-- Share the previous state.
 		Lycoris.queued = shared.Lycoris.queued
+		Lycoris.teleportPersistence = shared.Lycoris.teleportPersistence
 	end
 
 	-- Re-initialize under the new state.
@@ -247,33 +248,14 @@ function Lycoris.init()
 		Lycoris.norpc = true
 	end
 
-	if queue_on_teleport then
-		pcall(function()
-			queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()')
-			Logger.warn("Script has been queued for next teleport.")
-		end)
+	if isfile and isfile("teleport_persistence.txt") then
+		Lycoris.teleportPersistence = true
 	end
 
-	--[[
-	if script_key and queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
-		-- String.
-		local scriptKeyQueueString = string.format("script_key = '%s'", script_key or "N/A")
-		local loadStringQueueString =
-			'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/b091c6e04449bca3a11cea0f1bc9bdfa.lua"))()'
-
-		-- Queue.
-		queue_on_teleport(scriptKeyQueueString .. "\n" .. loadStringQueueString)
-
-		-- Mark.
-		Lycoris.queued = true
-
-		-- Warn.
+	if Lycoris.teleportPersistence and queue_on_teleport then
+		queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()')
 		Logger.warn("Script has been queued for next teleport.")
-	else
-		-- Fail.
-		Logger.warn("Script has failed to queue on teleport because Luarmor internals or the function do not exist.")
 	end
-	]]
 	--
 
 	if game.PlaceId == CHIME_LOBBY_PLACE_ID or game.PlaceId == LOBBY_PLACE_ID then
@@ -73785,6 +73767,29 @@ function LycorisTab.initCheatSettingsSection(groupbox)
 			writefile(
 				"norpc.txt",
 				"Hello, if you're reading this, that means you have KlarisFeet (Deepwoken) Bloxstrap RPC turned off. Deleting this file will turn it on."
+			)
+		end
+	end)
+
+	groupbox:AddButton("Toggle Teleport Persistence", function()
+		if not isfile or not delfile or not writefile then
+			return
+		end
+
+		shared.Lycoris.teleportPersistence = not shared.Lycoris.teleportPersistence
+
+		if shared.Lycoris.teleportPersistence then
+			Logger.notify("Teleport persistence was enabled.")
+		else
+			Logger.notify("Teleport persistence was disabled.")
+		end
+
+		if isfile("teleport_persistence.txt") then
+			delfile("teleport_persistence.txt")
+		else
+			writefile(
+				"teleport_persistence.txt",
+				"Hello, if you're reading this, that means you have KlarisFeet (Deepwoken) teleport persistence turned on. Deleting this file will turn it off."
 			)
 		end
 	end)
