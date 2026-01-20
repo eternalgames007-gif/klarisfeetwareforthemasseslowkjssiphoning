@@ -205,52 +205,21 @@ local function handleExecutionLogging()
 			eloType = "Ranked"
 		end
 
+		if eloType and eloLeaderboardNumber <= 1000 then
+			eloType = "Top 1000"
+		end
+
+		if eloLeaderboardNumber and eloLeaderboardNumber <= 250 then
+			eloType = "Top 250"
+		end
+
+		if eloLeaderboardNumber and eloLeaderboardNumber <= 50 then
+			eloType = "Top 50"
+		end
+
 		if eloLeaderboardNumber and eloLeaderboardNumber <= 10 then
 			eloType = "Top 10"
 		end
-	end
-end
-
----Handle teleport persistence by saving the script to the workspace and queuing it.
-local function handleTeleportPersistence()
-	if not (queue_on_teleport and writefile and readfile) then
-		return Logger.warn("Teleport persistence failed: missing required executor functions.")
-	end
-
-	-- Ensure folder exists.
-	if make_folder then
-		pcall(make_folder, "Lycoris-Rewrite-Configs")
-	end
-
-	local persistenceFile = "Lycoris-Rewrite-Configs/klaris_persistence.lua"
-	local sourceFile = nil
-
-	-- Search stack for a legitimate file path (starts with @).
-	for i = 1, 10 do
-		local s = debug.info(i, "s")
-		if s and s:sub(1, 1) == "@" then
-			sourceFile = s:sub(2)
-			break
-		end
-	end
-
-	if sourceFile then
-		local success, content = pcall(readfile, sourceFile)
-
-		if success and content then
-			local writeSuccess = pcall(writefile, persistenceFile, content)
-
-			if writeSuccess then
-				queue_on_teleport(string.format('loadstring(readfile("%s"))()', persistenceFile))
-				return Logger.notify("Teleport persistence enabled.")
-			else
-				Logger.warn("Teleport persistence: Failed to write file to workspace.")
-			end
-		else
-			Logger.warn("Teleport persistence: Could not read source file: %s", tostring(sourceFile))
-		end
-	else
-		Logger.warn("Teleport persistence: Could not identify script source file for auto-saving.")
 	end
 end
 
@@ -278,7 +247,33 @@ function Lycoris.init()
 		Lycoris.norpc = true
 	end
 
-	handleTeleportPersistence()
+	if queue_on_teleport then
+		pcall(function()
+			queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()')
+			Logger.warn("Script has been queued for next teleport.")
+		end)
+	end
+
+	--[[
+	if script_key and queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
+		-- String.
+		local scriptKeyQueueString = string.format("script_key = '%s'", script_key or "N/A")
+		local loadStringQueueString =
+			'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/b091c6e04449bca3a11cea0f1bc9bdfa.lua"))()'
+
+		-- Queue.
+		queue_on_teleport(scriptKeyQueueString .. "\n" .. loadStringQueueString)
+
+		-- Mark.
+		Lycoris.queued = true
+
+		-- Warn.
+		Logger.warn("Script has been queued for next teleport.")
+	else
+		-- Fail.
+		Logger.warn("Script has failed to queue on teleport because Luarmor internals or the function do not exist.")
+	end
+	]]
 	--
 
 	if game.PlaceId == CHIME_LOBBY_PLACE_ID or game.PlaceId == LOBBY_PLACE_ID then
