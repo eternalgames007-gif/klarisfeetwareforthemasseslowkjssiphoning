@@ -232,8 +232,7 @@ function Lycoris.queueTeleport()
 	end
 
 	queue([[
-        repeat task.wait() until game:IsLoaded()
-        task.wait(10)
+        repeat task.wait(10) until game:IsLoaded()
         if not shared.Lycoris then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()
         end
@@ -2449,10 +2448,10 @@ return LPH_NO_VIRTUALIZE(function()
 
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 
-				ContainerLabel.Visible = true
-				ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
+				ContainerLabel.Visible = State
+				ContainerLabel.TextColor3 = Library.AccentColor
 
-				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
+				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = "AccentColor"
 
 				local YSize = 0
 				local XSize = 0
