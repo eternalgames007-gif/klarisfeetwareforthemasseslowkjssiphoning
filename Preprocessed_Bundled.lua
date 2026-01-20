@@ -1031,8 +1031,8 @@ return LPH_NO_VIRTUALIZE(function()
 		AccentColor = Color3.fromRGB(0, 85, 255),
 		OutlineColor = Color3.fromRGB(50, 50, 50),
 		RiskColor = Color3.fromRGB(255, 50, 50),
-		-- ActiveKeybindColor = Color3.fromRGB(0, 85, 255),
-		-- WatermarkColor = Color3.fromRGB(0, 85, 255),
+		ActiveKeybindColor = Color3.fromRGB(0, 85, 255),
+		WatermarkColor = Color3.fromRGB(0, 85, 255),
 
 		Black = Color3.new(0, 0, 0),
 		Font = Font.fromEnum(Enum.Font.RobotoMono),
@@ -1042,6 +1042,8 @@ return LPH_NO_VIRTUALIZE(function()
 
 		Signals = {},
 		ScreenGui = ScreenGui,
+
+		CurrentRainbowColor = Color3.new(1, 0, 0),
 	}
 
 	local RainbowStep = 0
@@ -1591,7 +1593,9 @@ return LPH_NO_VIRTUALIZE(function()
 		for Idx, Object in next, Library.Registry do
 			for Property, ColorIdx in next, Object.Properties do
 				if type(ColorIdx) == "string" then
-					Object.Instance[Property] = Library[ColorIdx]
+					if Library[ColorIdx] then
+						Object.Instance[Property] = Library[ColorIdx]
+					end
 				elseif type(ColorIdx) == "function" then
 					Object.Instance[Property] = ColorIdx()
 				end
@@ -2451,9 +2455,9 @@ return LPH_NO_VIRTUALIZE(function()
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 
 				ContainerLabel.Visible = State
-				ContainerLabel.TextColor3 = Library.AccentColor -- Library.ActiveKeybindColor
+				ContainerLabel.TextColor3 = Library.ActiveKeybindColor
 
-				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = "AccentColor" -- "ActiveKeybindColor"
+				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = "ActiveKeybindColor"
 
 				local YSize = 0
 				local XSize = 0
@@ -4308,7 +4312,7 @@ return LPH_NO_VIRTUALIZE(function()
 		local WatermarkLabel = Library:CreateLabel({
 			Position = UDim2.new(0, 5, 0, 1),
 			Size = UDim2.new(1, -4, 1, 0),
-			TextColor3 = Library.AccentColor, -- Library.WatermarkColor,
+			TextColor3 = Library.WatermarkColor,
 			TextSize = 14,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			ZIndex = 203,
@@ -4316,7 +4320,7 @@ return LPH_NO_VIRTUALIZE(function()
 		})
 
 		Library:AddToRegistry(WatermarkLabel, {
-			TextColor3 = "AccentColor", -- "WatermarkColor",
+			TextColor3 = "WatermarkColor",
 		}, true)
 
 		Library.Watermark = WatermarkOuter
@@ -74379,8 +74383,8 @@ return LPH_NO_VIRTUALIZE(function()
 				"AccentColor",
 				"BackgroundColor",
 				"OutlineColor",
-				-- "ActiveKeybindColor",
-				-- "WatermarkColor",
+				"ActiveKeybindColor",
+				"WatermarkColor",
 			}
 			for i, field in next, options do
 				if Options and Options[field] then
@@ -74427,10 +74431,10 @@ return LPH_NO_VIRTUALIZE(function()
 			groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.AccentColor })
 			groupbox:AddLabel("Outline color"):AddColorPicker("OutlineColor", { Default = self.Library.OutlineColor })
 			groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.FontColor })
-			-- groupbox
-			-- 	:AddLabel("Active keybind color")
-			-- 	:AddColorPicker("ActiveKeybindColor", { Default = self.Library.ActiveKeybindColor })
-			-- groupbox:AddLabel("Watermark color"):AddColorPicker("WatermarkColor", { Default = self.Library.WatermarkColor })
+			groupbox
+				:AddLabel("Active keybind color")
+				:AddColorPicker("ActiveKeybindColor", { Default = self.Library.ActiveKeybindColor or self.Library.AccentColor })
+			groupbox:AddLabel("Watermark color"):AddColorPicker("WatermarkColor", { Default = self.Library.WatermarkColor or self.Library.AccentColor })
 
 			local ThemesArray = {}
 			for Name, Theme in next, self.BuiltInThemes do
@@ -74500,8 +74504,8 @@ return LPH_NO_VIRTUALIZE(function()
 			Options.AccentColor:OnChanged(UpdateTheme)
 			Options.OutlineColor:OnChanged(UpdateTheme)
 			Options.FontColor:OnChanged(UpdateTheme)
-			-- Options.ActiveKeybindColor:OnChanged(UpdateTheme)
-			-- Options.WatermarkColor:OnChanged(UpdateTheme)
+			Options.ActiveKeybindColor:OnChanged(UpdateTheme)
+			Options.WatermarkColor:OnChanged(UpdateTheme)
 		end
 
 		function ThemeManager:GetCustomTheme(file)
@@ -74532,8 +74536,8 @@ return LPH_NO_VIRTUALIZE(function()
 				"AccentColor",
 				"BackgroundColor",
 				"OutlineColor",
-				-- "ActiveKeybindColor",
-				-- "WatermarkColor",
+				"ActiveKeybindColor",
+				"WatermarkColor",
 			}
 
 			for _, field in next, fields do
