@@ -225,19 +225,19 @@ local function handleExecutionLogging()
 end
 
 ---Queue script for teleport.
--- function Lycoris.queueTeleport()
--- 	local queue = queue_on_teleport or (syn and syn.queue_on_teleport)
--- 	if not queue then
--- 		return
--- 	end
+function Lycoris.queueTeleport()
+	local queue = queue_on_teleport or (syn and syn.queue_on_teleport)
+	if not queue then
+		return
+	end
 
--- 	queue([[
---         repeat task.wait(15) until game:IsLoaded()
---         if not shared.Lycoris then
---             loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()
---         end
---     ]])
--- end
+	queue([[
+        repeat task.wait(15) until game:IsLoaded()
+        if not shared.Lycoris then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()
+        end
+    ]])
+end
 
 ---Initialize instance.
 function Lycoris.init()
@@ -250,12 +250,6 @@ function Lycoris.init()
 	repeat
 		localPlayer = playersService.LocalPlayer
 	until localPlayer ~= nil
-
-	-- Wait for splash screen to be dismissed.
-	-- local playerGui = localPlayer:WaitForChild("PlayerGui")
-	-- repeat
-	-- 	task.wait(1)
-	-- until not playerGui:FindFirstChild("Loading") and not playerGui:FindFirstChild("Entry")
 
 	if isfile and isfile("smarker.txt") then
 		Lycoris.silent = true
