@@ -251,29 +251,11 @@ function Lycoris.init()
 		localPlayer = playersService.LocalPlayer
 	until localPlayer ~= nil
 
-	-- Wait for game interface or character selection to appear.
-	local playerGui = localPlayer:WaitForChild("PlayerGui")
-
-	local function scanForText(parent, targetText)
-		for _, child in next, parent:GetDescendants() do
-			if (child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox")) and string.find(string.lower(child.Text), string.lower(targetText)) then
-				return child
-			end
-		end
-		return nil
-	end
-
-	-- Wait until "press any key" screen is found.
-	local titleScreenText = nil
-	repeat
-		task.wait(1)
-		titleScreenText = scanForText(playerGui, "press any key")
-	until titleScreenText
-
-	-- Wait until it's dismissed.
-	repeat
-		task.wait(1)
-	until not titleScreenText:IsDescendantOf(game) or not titleScreenText.Visible or titleScreenText.TextTransparency >= 1
+	-- Wait for splash screen to be dismissed.
+	-- local playerGui = localPlayer:WaitForChild("PlayerGui")
+	-- repeat
+	-- 	task.wait(1)
+	-- until not playerGui:FindFirstChild("Loading") and not playerGui:FindFirstChild("Entry")
 
 	if isfile and isfile("smarker.txt") then
 		Lycoris.silent = true
