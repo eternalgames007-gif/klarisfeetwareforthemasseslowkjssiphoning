@@ -231,12 +231,10 @@ function Lycoris.queueTeleport()
 	end
 
 	queue([[
-        repeat task.wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TopbarGui")
-        task.wait(4)
-        if not shared.Lycoris then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/KlarisFeet.lua"))()
-        end
-    ]])
+		repeat task.wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TopbarGui")
+		task.wait(3)
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/KlarisFeet.lua"))()
+	]])
 end
 
 ---Initialize instance.
@@ -413,6 +411,14 @@ function Lycoris.init()
 				clear = true,
 			},
 		})
+	end)
+
+	local teleportSignal = lycorisMaid:mark(Signal.new(playersService.LocalPlayer.OnTeleport))
+
+	teleportSignal:connect("Lycoris_OnTeleport", function(state)
+		if state == Enum.TeleportState.Started or state == Enum.TeleportState.InProgress then
+			Lycoris.queueTeleport()
+		end
 	end)
 end
 
