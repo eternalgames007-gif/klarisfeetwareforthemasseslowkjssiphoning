@@ -4809,6 +4809,167 @@ return LPH_NO_VIRTUALIZE(function()
 		end)
 	end
 
+	function Library:CreatePrompt(Config)
+		local Backdrop = Library:Create("Frame", {
+			BackgroundColor3 = Color3.new(0, 0, 0),
+			BackgroundTransparency = 0.5,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 10000,
+			Parent = ScreenGui,
+		})
+
+		local Outer = Library:Create("Frame", {
+			BackgroundColor3 = Color3.new(0, 0, 0),
+			BorderSizePixel = 0,
+			Position = UDim2.fromScale(0.5, 0.5),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Size = UDim2.fromOffset(300, 125),
+			ZIndex = 10001,
+			Parent = Backdrop,
+		})
+
+		local Inner = Library:Create("Frame", {
+			BackgroundColor3 = Library.MainColor,
+			BorderColor3 = Library.OutlineColor,
+			BorderMode = Enum.BorderMode.Inset,
+			Size = UDim2.new(1, -2, 1, -2),
+			Position = UDim2.fromOffset(1, 1),
+			ZIndex = 10002,
+			Parent = Outer,
+		})
+
+		Library:AddToRegistry(Inner, {
+			BackgroundColor3 = "MainColor",
+			BorderColor3 = "OutlineColor",
+		})
+
+		local TitleLabel = Library:CreateLabel({
+			Size = UDim2.new(1, 0, 0, 25),
+			Position = UDim2.fromOffset(0, 0),
+			Text = Config.Title or "Confirmation",
+			TextColor3 = Library.AccentColor,
+			ZIndex = 10003,
+			Parent = Inner,
+		})
+
+		Library:AddToRegistry(TitleLabel, {
+			TextColor3 = "AccentColor",
+		})
+
+		local MainSectionOuter = Library:Create("Frame", {
+			BackgroundColor3 = Library.BackgroundColor,
+			BorderColor3 = Library.OutlineColor,
+			Position = UDim2.new(0, 8, 0, 25),
+			Size = UDim2.new(1, -16, 1, -33),
+			ZIndex = 10003,
+			Parent = Inner,
+		})
+
+		Library:AddToRegistry(MainSectionOuter, {
+			BackgroundColor3 = "BackgroundColor",
+			BorderColor3 = "OutlineColor",
+		})
+
+		local MainSectionInner = Library:Create("Frame", {
+			BackgroundColor3 = Library.BackgroundColor,
+			BorderColor3 = Color3.new(0, 0, 0),
+			BorderMode = Enum.BorderMode.Inset,
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = 10004,
+			Parent = MainSectionOuter,
+		})
+
+		Library:AddToRegistry(MainSectionInner, {
+			BackgroundColor3 = "BackgroundColor",
+		})
+
+		local MessageLabel = Library:CreateLabel({
+			Size = UDim2.new(1, -16, 1, -45),
+			Position = UDim2.fromOffset(8, 5),
+			Text = Config.Text or "Are you sure?",
+			TextWrapped = true,
+			ZIndex = 10005,
+			Parent = MainSectionInner,
+		})
+
+		local ButtonArea = Library:Create("Frame", {
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 8, 1, -35),
+			Size = UDim2.new(1, -16, 0, 25),
+			ZIndex = 10005,
+			Parent = MainSectionInner,
+		})
+
+		Library:Create("UIListLayout", {
+			Padding = UDim.new(0, 8),
+			FillDirection = Enum.FillDirection.Horizontal,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+			Parent = ButtonArea,
+		})
+
+		local function CreateButton(Name, Callback)
+			local ButtonOuter = Library:Create("Frame", {
+				BackgroundColor3 = Color3.new(0, 0, 0),
+				BorderColor3 = Color3.new(0, 0, 0),
+				Size = UDim2.new(0.5, -4, 1, 0),
+				ZIndex = 10006,
+				Parent = ButtonArea,
+			})
+
+			local ButtonInner = Library:Create("Frame", {
+				BackgroundColor3 = Library.MainColor,
+				BorderColor3 = Library.OutlineColor,
+				BorderMode = Enum.BorderMode.Inset,
+				Size = UDim2.new(1, 0, 1, 0),
+				ZIndex = 10007,
+				Parent = ButtonOuter,
+			})
+
+			Library:AddToRegistry(ButtonInner, {
+				BackgroundColor3 = "MainColor",
+				BorderColor3 = "OutlineColor",
+			})
+
+			local Label = Library:CreateLabel({
+				Size = UDim2.new(1, 0, 1, 0),
+				Text = Name,
+				ZIndex = 10008,
+				Parent = ButtonInner,
+			})
+
+			Library:OnHighlight(ButtonOuter, ButtonOuter, { BorderColor3 = "AccentColor" }, { BorderColor3 = "Black" })
+
+			local Button = Library:Create("TextButton", {
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 1, 0),
+				Text = "",
+				ZIndex = 10009,
+				Parent = ButtonInner,
+			})
+
+			Button.MouseButton1Click:Connect(function()
+				Backdrop:Destroy()
+				if Callback then
+					Callback()
+				end
+			end)
+		end
+
+		CreateButton("Yes", function()
+			if Config.Callback then
+				Config.Callback(true)
+			end
+		end)
+
+		CreateButton("No", function()
+			if Config.Callback then
+				Config.Callback(false)
+			end
+		end)
+	end
+
+
 	function Library:CreateWindow(...)
 		local Arguments = { ... }
 		local Config = { AnchorPoint = Vector2.zero }
@@ -74260,7 +74421,15 @@ function LycorisTab.initCheatSettingsSection(groupbox)
 	end)
 
 	groupbox:AddButton("Unload Cheat", function()
-		shared.Lycoris.detach()
+		Library:CreatePrompt({
+			Title = "Unload Cheat",
+			Text = "Are you sure you want to unload the cheat?",
+			Callback = function(Value)
+				if Value then
+					shared.Lycoris.detach()
+				end
+			end,
+		})
 	end)
 end
 
@@ -74683,23 +74852,43 @@ return LPH_NO_VIRTUALIZE(function()
 				:AddButton("Load config", function()
 					local name = Options.SaveManager_ConfigList.Value
 
-					local success, err = self:Load(name)
-					if not success then
-						return self.Library:Notify("Failed to load config: " .. err)
-					end
+					self.Library:CreatePrompt({
+						Title = "Load Config",
+						Text = string.format("Are you sure you want to load config %q?", tostring(name)),
+						Callback = function(Value)
+							if not Value then
+								return
+							end
 
-					self.Library:Notify(string.format("Loaded config %q", name))
+							local success, err = self:Load(name)
+							if not success then
+								return self.Library:Notify("Failed to load config: " .. err)
+							end
+
+							self.Library:Notify(string.format("Loaded config %q", name))
+						end,
+					})
 				end)
 
 			section:AddButton("Overwrite config", function()
 				local name = Options.SaveManager_ConfigList.Value
 
-				local success, err = self:Save(name)
-				if not success then
-					return self.Library:Notify("Failed to overwrite config: " .. err)
-				end
+				self.Library:CreatePrompt({
+					Title = "Overwrite Config",
+					Text = string.format("Are you sure you want to overwrite config %q?", tostring(name)),
+					Callback = function(Value)
+						if not Value then
+							return
+						end
 
-				self.Library:Notify(string.format("Overwrote config %q", name))
+						local success, err = self:Save(name)
+						if not success then
+							return self.Library:Notify("Failed to overwrite config: " .. err)
+						end
+
+						self.Library:Notify(string.format("Overwrote config %q", name))
+					end,
+				})
 			end)
 
 			section:AddButton("Refresh list", function()
