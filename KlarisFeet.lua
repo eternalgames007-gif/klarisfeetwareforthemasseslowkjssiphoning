@@ -231,8 +231,10 @@ function Lycoris.queueTeleport()
 	end
 
 	queue([[
+        repeat task.wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TopbarGui")
+        task.wait(4)
         if not shared.Lycoris then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/KlarisFeet.lua"))()
         end
     ]])
 end
