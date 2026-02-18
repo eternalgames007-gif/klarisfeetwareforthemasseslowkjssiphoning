@@ -3,8 +3,8 @@ if game.PlaceId == 4111023553 or game.PlaceId == 137000980549032 or game.PlaceId
 loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/KlarisFeet.lua"))()
 end
 -- TypeSoul
---local suc2, scr2 = pcall(game.HttpGet, game, "insert typesoul klarisfeet")
---if suc2 and scr2 then 
--- pcall(loadstring(scr2))
---end
---elseif game.PlaceId == 14070029709 or game.CreatorId == 32740991 then
+elseif game.PlaceId == 14070029709 or game.CreatorId == 32740991 then
+local suc2, scr2 = pcall(game.HttpGet, game, "https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/SetroFeet.lua")
+if suc2 and scr2 then 
+ pcall(loadstring(scr2))
+end
