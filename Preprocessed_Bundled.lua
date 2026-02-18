@@ -1,14 +1,3 @@
--- Wait for game to fully load before running.
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
-
-local plr = game:GetService("Players").LocalPlayer
-local char = plr.Character or plr.CharacterAdded:Wait()
-char:WaitForChild("Humanoid")
-char:WaitForChild("HumanoidRootPart")
-task.wait(5)
-
 -- Bundled by luabundle {"luaVersion":"5.1","version":"1.7.0"}
 local __bundle_require, __bundle_loaded, __bundle_register, __bundle_modules = (function(superRequire)
 	local loadingPlaceholder = {[{}] = true}
@@ -57,18 +46,6 @@ __bundle_register("__root", function(require, _LOADED, __bundle_register, __bund
 if not shared then
 	return warn("No shared, no script.")
 end
-
--- Wait for game to fully load before running.
-if not game:IsLoaded() then
-	game.Loaded:Wait()
-end
-
-local plr = game:GetService("Players").LocalPlayer
-local char = plr.Character or plr.CharacterAdded:Wait()
-char:WaitForChild("Humanoid")
-char:WaitForChild("HumanoidRootPart")
-task.wait(1)
-
 
 -- Initialize Luraph globals if they do not exist.
 loadstring("getfenv().LPH_NO_VIRTUALIZE = function(...) return ... end")()
@@ -254,8 +231,6 @@ function Lycoris.queueTeleport()
 	end
 
 	queue([[
-        repeat task.wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TopbarGui")
-        task.wait(4)
         if not shared.Lycoris then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()
         end
@@ -1065,10 +1040,13 @@ return LPH_NO_VIRTUALIZE(function()
 		BackgroundColor = Color3.fromRGB(20, 20, 20),
 		AccentColor = Color3.fromRGB(0, 85, 255),
 		OutlineColor = Color3.fromRGB(50, 50, 50),
+
+		KeybindColor = Color3.fromRGB(0, 85, 255),
+		WatermarkColor = Color3.fromRGB(0, 85, 255),
 		RiskColor = Color3.fromRGB(255, 50, 50),
 
-		KeybindListActiveColor = Color3.fromRGB(0, 85, 255),
-		WatermarkTextColor = Color3.fromRGB(0, 85, 255),
+		CurrentRainbowHue = 0,
+		CurrentRainbowColor = Color3.fromHSV(0, 0.8, 1),
 
 		Black = Color3.new(0, 0, 0),
 		Font = Font.fromEnum(Enum.Font.RobotoMono),
@@ -2487,9 +2465,9 @@ return LPH_NO_VIRTUALIZE(function()
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 
 				ContainerLabel.Visible = State
-				ContainerLabel.TextColor3 = State and Library.KeybindListActiveColor or Library.FontColor
+				ContainerLabel.TextColor3 = State and Library.KeybindColor or Library.FontColor
 
-				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "KeybindListActiveColor" or "FontColor"
+				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "KeybindColor" or "FontColor"
 
 				local YSize = 0
 				local XSize = 0
@@ -4344,7 +4322,7 @@ return LPH_NO_VIRTUALIZE(function()
 		local WatermarkLabel = Library:CreateLabel({
 			Position = UDim2.new(0, 5, 0, 1),
 			Size = UDim2.new(1, -4, 1, 0),
-			TextColor3 = Library.WatermarkTextColor,
+			TextColor3 = Library.WatermarkColor,
 			TextSize = 14,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			ZIndex = 203,
@@ -4352,7 +4330,7 @@ return LPH_NO_VIRTUALIZE(function()
 		})
 
 		Library:AddToRegistry(WatermarkLabel, {
-			TextColor3 = "WatermarkTextColor",
+			TextColor3 = "WatermarkColor",
 		}, true)
 
 		Library.Watermark = WatermarkOuter
@@ -74735,49 +74713,49 @@ return LPH_NO_VIRTUALIZE(function()
 			["Default"] = {
 				1,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"0055ff","BackgroundColor":"141414","OutlineColor":"323232","KeybindListActiveColor":"0055ff","WatermarkTextColor":"0055ff"}'
+					'{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"0055ff","BackgroundColor":"141414","OutlineColor":"323232","KeybindColor":"0055ff","WatermarkColor":"0055ff"}'
 				),
 			},
 			["BBot"] = {
 				2,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"1e1e1e","AccentColor":"7e48a3","BackgroundColor":"232323","OutlineColor":"141414"}'
+					'{"FontColor":"ffffff","MainColor":"1e1e1e","AccentColor":"7e48a3","BackgroundColor":"232323","OutlineColor":"141414","KeybindColor":"7e48a3","WatermarkColor":"7e48a3"}'
 				),
 			},
 			["Fatality"] = {
 				3,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"1e1842","AccentColor":"c50754","BackgroundColor":"191335","OutlineColor":"3c355d"}'
+					'{"FontColor":"ffffff","MainColor":"1e1842","AccentColor":"c50754","BackgroundColor":"191335","OutlineColor":"3c355d","KeybindColor":"c50754","WatermarkColor":"c50754"}'
 				),
 			},
 			["Jester"] = {
 				4,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737"}'
+					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737","KeybindColor":"db4467","WatermarkColor":"db4467"}'
 				),
 			},
 			["Mint"] = {
 				5,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"3db488","BackgroundColor":"1c1c1c","OutlineColor":"373737"}'
+					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"3db488","BackgroundColor":"1c1c1c","OutlineColor":"373737","KeybindColor":"3db488","WatermarkColor":"3db488"}'
 				),
 			},
 			["Tokyo Night"] = {
 				6,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"191925","AccentColor":"6759b3","BackgroundColor":"16161f","OutlineColor":"323232"}'
+					'{"FontColor":"ffffff","MainColor":"191925","AccentColor":"6759b3","BackgroundColor":"16161f","OutlineColor":"323232","KeybindColor":"6759b3","WatermarkColor":"6759b3"}'
 				),
 			},
 			["Ubuntu"] = {
 				7,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"3e3e3e","AccentColor":"e2581e","BackgroundColor":"323232","OutlineColor":"191919"}'
+					'{"FontColor":"ffffff","MainColor":"3e3e3e","AccentColor":"e2581e","BackgroundColor":"323232","OutlineColor":"191919","KeybindColor":"e2581e","WatermarkColor":"e2581e"}'
 				),
 			},
 			["Quartz"] = {
 				8,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"232330","AccentColor":"426e87","BackgroundColor":"1d1b26","OutlineColor":"27232f"}'
+					'{"FontColor":"ffffff","MainColor":"232330","AccentColor":"426e87","BackgroundColor":"1d1b26","OutlineColor":"27232f","KeybindColor":"426e87","WatermarkColor":"426e87"}'
 				),
 			},
 		}
@@ -74813,7 +74791,15 @@ return LPH_NO_VIRTUALIZE(function()
 
 		function ThemeManager:ThemeUpdate()
 			-- This allows us to force apply themes without loading the themes tab :)
-			local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "KeybindListActiveColor", "WatermarkTextColor" }
+			local options = {
+				"FontColor",
+				"MainColor",
+				"AccentColor",
+				"BackgroundColor",
+				"OutlineColor",
+				"KeybindColor",
+				"WatermarkColor",
+			}
 			for i, field in next, options do
 				if Options and Options[field] then
 					self.Library[field] = Options[field].Value
@@ -74859,8 +74845,8 @@ return LPH_NO_VIRTUALIZE(function()
 			groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.AccentColor })
 			groupbox:AddLabel("Outline color"):AddColorPicker("OutlineColor", { Default = self.Library.OutlineColor })
 			groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.FontColor })
-			groupbox:AddLabel("Keybind active color"):AddColorPicker("KeybindListActiveColor", { Default = self.Library.KeybindListActiveColor })
-			groupbox:AddLabel("Watermark text color"):AddColorPicker("WatermarkTextColor", { Default = self.Library.WatermarkTextColor })
+			groupbox:AddLabel("Keybind color"):AddColorPicker("KeybindColor", { Default = self.Library.KeybindColor })
+			groupbox:AddLabel("Watermark color"):AddColorPicker("WatermarkColor", { Default = self.Library.WatermarkColor })
 
 			local ThemesArray = {}
 			for Name, Theme in next, self.BuiltInThemes do
@@ -74930,8 +74916,8 @@ return LPH_NO_VIRTUALIZE(function()
 			Options.AccentColor:OnChanged(UpdateTheme)
 			Options.OutlineColor:OnChanged(UpdateTheme)
 			Options.FontColor:OnChanged(UpdateTheme)
-			Options.KeybindListActiveColor:OnChanged(UpdateTheme)
-			Options.WatermarkTextColor:OnChanged(UpdateTheme)
+			Options.KeybindColor:OnChanged(UpdateTheme)
+			Options.WatermarkColor:OnChanged(UpdateTheme)
 		end
 
 		function ThemeManager:GetCustomTheme(file)
@@ -74956,7 +74942,15 @@ return LPH_NO_VIRTUALIZE(function()
 			end
 
 			local theme = {}
-			local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "KeybindListActiveColor", "WatermarkTextColor" }
+			local fields = {
+				"FontColor",
+				"MainColor",
+				"AccentColor",
+				"BackgroundColor",
+				"OutlineColor",
+				"KeybindColor",
+				"WatermarkColor",
+			}
 
 			for _, field in next, fields do
 				local option = Options[field]
