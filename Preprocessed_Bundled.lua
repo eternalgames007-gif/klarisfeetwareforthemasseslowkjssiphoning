@@ -1,3 +1,14 @@
+-- Wait for game to fully load before running.
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
+local plr = game:GetService("Players").LocalPlayer
+local char = plr.Character or plr.CharacterAdded:Wait()
+char:WaitForChild("Humanoid")
+char:WaitForChild("HumanoidRootPart")
+task.wait(5)
+
 -- Bundled by luabundle {"luaVersion":"5.1","version":"1.7.0"}
 local __bundle_require, __bundle_loaded, __bundle_register, __bundle_modules = (function(superRequire)
 	local loadingPlaceholder = {[{}] = true}
@@ -46,6 +57,18 @@ __bundle_register("__root", function(require, _LOADED, __bundle_register, __bund
 if not shared then
 	return warn("No shared, no script.")
 end
+
+-- Wait for game to fully load before running.
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
+
+local plr = game:GetService("Players").LocalPlayer
+local char = plr.Character or plr.CharacterAdded:Wait()
+char:WaitForChild("Humanoid")
+char:WaitForChild("HumanoidRootPart")
+task.wait(1)
+
 
 -- Initialize Luraph globals if they do not exist.
 loadstring("getfenv().LPH_NO_VIRTUALIZE = function(...) return ... end")()
@@ -232,7 +255,7 @@ function Lycoris.queueTeleport()
 
 	queue([[
         repeat task.wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TopbarGui")
-        task.wait(5)
+        task.wait(4)
         if not shared.Lycoris then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/Preprocessed_Bundled.lua"))()
         end
@@ -1043,6 +1066,9 @@ return LPH_NO_VIRTUALIZE(function()
 		AccentColor = Color3.fromRGB(0, 85, 255),
 		OutlineColor = Color3.fromRGB(50, 50, 50),
 		RiskColor = Color3.fromRGB(255, 50, 50),
+
+		KeybindListActiveColor = Color3.fromRGB(0, 85, 255),
+		WatermarkTextColor = Color3.fromRGB(0, 85, 255),
 
 		Black = Color3.new(0, 0, 0),
 		Font = Font.fromEnum(Enum.Font.RobotoMono),
@@ -2460,10 +2486,10 @@ return LPH_NO_VIRTUALIZE(function()
 
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 
-				ContainerLabel.Visible = true
-				ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
+				ContainerLabel.Visible = State
+				ContainerLabel.TextColor3 = State and Library.KeybindListActiveColor or Library.FontColor
 
-				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
+				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "KeybindListActiveColor" or "FontColor"
 
 				local YSize = 0
 				local XSize = 0
@@ -4318,7 +4344,7 @@ return LPH_NO_VIRTUALIZE(function()
 		local WatermarkLabel = Library:CreateLabel({
 			Position = UDim2.new(0, 5, 0, 1),
 			Size = UDim2.new(1, -4, 1, 0),
-			TextColor3 = Library.AccentColor,
+			TextColor3 = Library.WatermarkTextColor,
 			TextSize = 14,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			ZIndex = 203,
@@ -4326,7 +4352,7 @@ return LPH_NO_VIRTUALIZE(function()
 		})
 
 		Library:AddToRegistry(WatermarkLabel, {
-			TextColor3 = "AccentColor",
+			TextColor3 = "WatermarkTextColor",
 		}, true)
 
 		Library.Watermark = WatermarkOuter
@@ -74709,7 +74735,7 @@ return LPH_NO_VIRTUALIZE(function()
 			["Default"] = {
 				1,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"0055ff","BackgroundColor":"141414","OutlineColor":"323232"}'
+					'{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"0055ff","BackgroundColor":"141414","OutlineColor":"323232","KeybindListActiveColor":"0055ff","WatermarkTextColor":"0055ff"}'
 				),
 			},
 			["BBot"] = {
@@ -74787,7 +74813,7 @@ return LPH_NO_VIRTUALIZE(function()
 
 		function ThemeManager:ThemeUpdate()
 			-- This allows us to force apply themes without loading the themes tab :)
-			local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+			local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "KeybindListActiveColor", "WatermarkTextColor" }
 			for i, field in next, options do
 				if Options and Options[field] then
 					self.Library[field] = Options[field].Value
@@ -74833,6 +74859,8 @@ return LPH_NO_VIRTUALIZE(function()
 			groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.AccentColor })
 			groupbox:AddLabel("Outline color"):AddColorPicker("OutlineColor", { Default = self.Library.OutlineColor })
 			groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.FontColor })
+			groupbox:AddLabel("Keybind active color"):AddColorPicker("KeybindListActiveColor", { Default = self.Library.KeybindListActiveColor })
+			groupbox:AddLabel("Watermark text color"):AddColorPicker("WatermarkTextColor", { Default = self.Library.WatermarkTextColor })
 
 			local ThemesArray = {}
 			for Name, Theme in next, self.BuiltInThemes do
@@ -74902,6 +74930,8 @@ return LPH_NO_VIRTUALIZE(function()
 			Options.AccentColor:OnChanged(UpdateTheme)
 			Options.OutlineColor:OnChanged(UpdateTheme)
 			Options.FontColor:OnChanged(UpdateTheme)
+			Options.KeybindListActiveColor:OnChanged(UpdateTheme)
+			Options.WatermarkTextColor:OnChanged(UpdateTheme)
 		end
 
 		function ThemeManager:GetCustomTheme(file)
@@ -74926,7 +74956,7 @@ return LPH_NO_VIRTUALIZE(function()
 			end
 
 			local theme = {}
-			local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+			local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "KeybindListActiveColor", "WatermarkTextColor" }
 
 			for _, field in next, fields do
 				local option = Options[field]
