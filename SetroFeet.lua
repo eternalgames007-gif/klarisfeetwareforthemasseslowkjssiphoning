@@ -179,9 +179,9 @@ function Lycoris.init()
 		Lycoris.dpscanning = true
 	end
 
-	if script_key and queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
+	if queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
 		-- String.
-		local scriptKeyQueueString = string.format("script_key = '%s'", script_key or "N/A")
+		local scriptKeyQueueString = "script_key = " .. (script_key and string.format("'%s'", script_key) or "nil")
 		local loadStringQueueString =
 			'loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/SetroFeet.lua"))()'
 
@@ -195,7 +195,7 @@ function Lycoris.init()
 		Logger.warn("Script has been queued for next teleport.")
 	else
 		-- Fail.
-		Logger.warn("Script has failed to queue on teleport because Luarmor internals or the function do not exist.")
+		Logger.warn("Script has failed to queue on teleport because the function does not exist or was already queued.")
 	end
 
 	local tslot = PersistentData.get("tslot")
