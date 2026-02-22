@@ -181,7 +181,8 @@ function Lycoris.init()
 
 	if queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
 		-- String.
-		local scriptKeyQueueString = "script_key = " .. (script_key and string.format("'%s'", script_key) or "nil")
+		local key = typeof(script_key) == "string" and script_key or (typeof(getgenv) == "function" and getgenv().script_key) or "N/A"
+		local scriptKeyQueueString = string.format("getgenv().script_key = %q", key)
 		local loadStringQueueString =
 			'loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/SetroFeet.lua"))()'
 
@@ -193,9 +194,9 @@ function Lycoris.init()
 
 		-- Warn.
 		Logger.warn("Script has been queued for next teleport.")
-	else
+	elseif not queue_on_teleport then
 		-- Fail.
-		Logger.warn("Script has failed to queue on teleport because the function does not exist or was already queued.")
+		Logger.warn("Script has failed to queue on teleport because the function does not exist.")
 	end
 
 	local tslot = PersistentData.get("tslot")
