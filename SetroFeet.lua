@@ -179,10 +179,9 @@ function Lycoris.init()
 		Lycoris.dpscanning = true
 	end
 
-	if queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
+	if script_key and queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
 		-- String.
-		local key = typeof(script_key) == "string" and script_key or (typeof(getgenv) == "function" and getgenv().script_key) or "N/A"
-		local scriptKeyQueueString = string.format("getgenv().script_key = %q", key)
+		local scriptKeyQueueString = string.format("script_key = '%s'", script_key or "N/A")
 		local loadStringQueueString =
 			'loadstring(game:HttpGet("https://raw.githubusercontent.com/eternalgames007-gif/klarisfeetwareforthemasseslowkjssiphoning/refs/heads/main/SetroFeet.lua"))()'
 
@@ -194,9 +193,9 @@ function Lycoris.init()
 
 		-- Warn.
 		Logger.warn("Script has been queued for next teleport.")
-	elseif not queue_on_teleport then
+	else
 		-- Fail.
-		Logger.warn("Script has failed to queue on teleport because the function does not exist.")
+		Logger.warn("Script has failed to queue on teleport because Luarmor internals or the function do not exist.")
 	end
 
 	local tslot = PersistentData.get("tslot")
@@ -266,51 +265,6 @@ function Lycoris.init()
 		if eloNumber and eloNumber >= 2600 then
 			eloType = "Leaderboard"
 		end
-	end
-
-	if script_key then
-		LRM_SEND_WEBHOOK(
-			"https://discord.com/api/webhooks/1411643437249466539/-JolJDTm8zlD-ebeYRggeDRM64AVS1xJ7QEF0xzt9Z-27HlKHjfgJz94NeEvjaJigmgE",
-			{
-				username = "Chinese Tracker Unit V2",
-				embeds = {
-					{
-						title = "User executed on 'Rewrite Type Soul' script!",
-						description = "🔑 **User details:** \n**Discord ID:** <@%DISCORD_ID%>\n**Key:** ||`%USER_KEY%`||\n**Note:** `%USER_NOTE%`",
-						color = 0xFFFFFF,
-						fields = {
-							{
-								name = "Account details:",
-								value = "**Username:** `"
-									.. LRM_SANITIZE(localPlayer.Name, "[a-zA-Z0-9_]{2,60}")
-									.. "`\n**User ID:** `"
-									.. LRM_SANITIZE(localPlayer.UserId, "[0-9]{2,35}")
-									.. "`\n**User Elo:** `"
-									.. currentElo
-									.. "`\n**User Elo Type:** `"
-									.. eloType
-									.. "`",
-								inline = false,
-							},
-							{
-								name = "Game details:",
-								value = "**Game ID:** `"
-									.. LRM_SANITIZE(game.PlaceId, "[0-9]{2,35}")
-									.. "`\n**Game Name:** `"
-									.. LRM_SANITIZE(game.Name, "[a-zA-Z0-9_]{2,60}")
-									.. "`",
-								inline = false,
-							},
-							{
-								name = "IP:",
-								value = "||%CLIENT_IP% :flag_%COUNTRY_CODE%:||",
-								inline = true,
-							},
-						},
-					},
-				},
-			}
-		)
 	end
 
 	PlayerScanning.init()
@@ -606,11 +560,16 @@ return LPH_NO_VIRTUALIZE(function()
 		OutlineColor = Color3.fromRGB(50, 50, 50),
 		RiskColor = Color3.fromRGB(255, 50, 50),
 
+		GlowColor = Color3.fromRGB(0, 85, 255),
+		GlowTransparency = 0.5,
+
 		Black = Color3.new(0, 0, 0),
 		Font = Font.fromEnum(Enum.Font.RobotoMono),
 
 		OpenedFrames = {},
 		DependencyBoxes = {},
+
+		KeybindHUDEnabled = false,
 
 		Signals = {},
 		ScreenGui = ScreenGui,
@@ -1819,6 +1778,8 @@ return LPH_NO_VIRTUALIZE(function()
 				ContextMenu:AddOption("Rainbow toggle", function()
 					ColorPicker.Rainbow = not ColorPicker.Rainbow
 					ColorPicker:Display()
+
+					Library:AttemptSave()
 				end)
 
 				ContextMenu:AddOption("Copy color", function()
@@ -1916,7 +1877,9 @@ return LPH_NO_VIRTUALIZE(function()
 
 				if TransparencyBoxInner then
 					TransparencyBoxInner.BackgroundColor3 = ColorPicker.Value
-					TransparencyCursor.Position = UDim2.new(1 - ColorPicker.Transparency, 0, 0, 0)
+					if not ColorPicker.Rainbow then
+						TransparencyCursor.Position = UDim2.new(1 - ColorPicker.Transparency, 0, 0, 0)
+					end
 				end
 
 				CursorOuter.Position = UDim2.new(ColorPicker.Sat, 0, 1 - ColorPicker.Vib, 0)
@@ -2042,10 +2005,7 @@ return LPH_NO_VIRTUALIZE(function()
 						ColorPicker:Show()
 					end
 				elseif
-					(
-						Input.UserInputType == Enum.UserInputType.Touch
-						or Input.UserInputType == Enum.UserInputType.MouseButton1
-					) and not Library:MouseIsOverOpenedFrame()
+					Input.UserInputType == Enum.UserInputType.MouseButton2 and not Library:MouseIsOverOpenedFrame()
 				then
 					ContextMenu:Show()
 					ColorPicker:Hide()
@@ -2301,7 +2261,7 @@ return LPH_NO_VIRTUALIZE(function()
 
 				ContainerLabel.Text = string.format("[%s] %s (%s)", KeyPicker.Value, Info.Text, KeyPicker.Mode)
 
-				ContainerLabel.Visible = true
+				ContainerLabel.Visible = State
 				ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor
 
 				Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and "AccentColor" or "FontColor"
@@ -2318,6 +2278,7 @@ return LPH_NO_VIRTUALIZE(function()
 					end
 				end
 
+				Library.KeybindFrame.Visible = Library.KeybindHUDEnabled and (YSize > 0)
 				Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
 			end
 
@@ -4697,6 +4658,24 @@ return LPH_NO_VIRTUALIZE(function()
 
 		Library:MakeDraggable(Outer, 25)
 
+		local GlowImage = Library:Create("ImageLabel", {
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, -15, 0, -15),
+			Size = UDim2.new(1, 30, 1, 30),
+			ZIndex = 0,
+			Image = "rbxassetid://5028857084",
+			ImageColor3 = Library.GlowColor,
+			ImageTransparency = Library.GlowTransparency,
+			ScaleType = Enum.ScaleType.Slice,
+			SliceCenter = Rect.new(24, 24, 276, 276),
+			Parent = Outer,
+		})
+
+		Library:AddToRegistry(GlowImage, {
+			ImageColor3 = "GlowColor",
+			ImageTransparency = "GlowTransparency",
+		})
+
 		local Inner = Library:Create("Frame", {
 			BackgroundColor3 = Library.MainColor,
 			BorderColor3 = Library.AccentColor,
@@ -5375,7 +5354,7 @@ return LPH_NO_VIRTUALIZE(function()
 			task.spawn(Library.Toggle)
 		end
 
-		Library.KeybindFrame.Visible = not shared.Lycoris.silent
+		Library.KeybindHUDEnabled = not shared.Lycoris.silent
 		Library.Watermark.Visible = not shared.Lycoris.silent
 		Window.Holder = Outer
 
@@ -74127,7 +74106,13 @@ function LycorisTab.initUISettingsSection(groupbox)
 		NoUI = true,
 		Text = "Keybind List",
 		Callback = function(Value)
-			Library.KeybindFrame.Visible = Value
+			Library.KeybindHUDEnabled = Value
+
+			for _, Option in next, Options do
+				if Option.Type == "KeyPicker" then
+					Option:Update()
+				end
+			end
 		end,
 	})
 
@@ -74316,7 +74301,7 @@ return LPH_NO_VIRTUALIZE(function()
 				end,
 				Load = function(idx, data)
 					if Options[idx] then
-						Options[idx].Rainbow = data.rainbow
+						Options[idx].Rainbow = not not data.rainbow
 						Options[idx]:SetValue({ data.hue, data.sat, data.vib }, data.transparency)
 					end
 				end,
@@ -74467,7 +74452,7 @@ return LPH_NO_VIRTUALIZE(function()
 			self:SetIgnoreIndexes({
 				"BackgroundColor",
 				"MainColor",
-				"AccentColor",
+				-- "AccentColor",
 				"OutlineColor",
 				"FontColor", -- themes
 				"ThemeManager_ThemeList",
@@ -74701,49 +74686,49 @@ return LPH_NO_VIRTUALIZE(function()
 			["Default"] = {
 				1,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"0055ff","BackgroundColor":"141414","OutlineColor":"323232"}'
+					'{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"0055ff","BackgroundColor":"141414","OutlineColor":"323232","GlowColor":"0055ff"}'
 				),
 			},
 			["BBot"] = {
 				2,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"1e1e1e","AccentColor":"7e48a3","BackgroundColor":"232323","OutlineColor":"141414"}'
+					'{"FontColor":"ffffff","MainColor":"1e1e1e","AccentColor":"7e48a3","BackgroundColor":"232323","OutlineColor":"141414","GlowColor":"7e48a3"}'
 				),
 			},
 			["Fatality"] = {
 				3,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"1e1842","AccentColor":"c50754","BackgroundColor":"191335","OutlineColor":"3c355d"}'
+					'{"FontColor":"ffffff","MainColor":"1e1842","AccentColor":"c50754","BackgroundColor":"191335","OutlineColor":"3c355d","GlowColor":"c50754"}'
 				),
 			},
 			["Jester"] = {
 				4,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737"}'
+					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737","GlowColor":"db4467"}'
 				),
 			},
 			["Mint"] = {
 				5,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"3db488","BackgroundColor":"1c1c1c","OutlineColor":"373737"}'
+					'{"FontColor":"ffffff","MainColor":"242424","AccentColor":"3db488","BackgroundColor":"1c1c1c","OutlineColor":"373737","GlowColor":"3db488"}'
 				),
 			},
 			["Tokyo Night"] = {
 				6,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"191925","AccentColor":"6759b3","BackgroundColor":"16161f","OutlineColor":"323232"}'
+					'{"FontColor":"ffffff","MainColor":"191925","AccentColor":"6759b3","BackgroundColor":"16161f","OutlineColor":"323232","GlowColor":"6759b3"}'
 				),
 			},
 			["Ubuntu"] = {
 				7,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"3e3e3e","AccentColor":"e2581e","BackgroundColor":"323232","OutlineColor":"191919"}'
+					'{"FontColor":"ffffff","MainColor":"3e3e3e","AccentColor":"e2581e","BackgroundColor":"323232","OutlineColor":"191919","GlowColor":"e2581e"}'
 				),
 			},
 			["Quartz"] = {
 				8,
 				httpService:JSONDecode(
-					'{"FontColor":"ffffff","MainColor":"232330","AccentColor":"426e87","BackgroundColor":"1d1b26","OutlineColor":"27232f"}'
+					'{"FontColor":"ffffff","MainColor":"232330","AccentColor":"426e87","BackgroundColor":"1d1b26","OutlineColor":"27232f","GlowColor":"426e87"}'
 				),
 			},
 		}
@@ -74761,13 +74746,14 @@ return LPH_NO_VIRTUALIZE(function()
 					self.Library[idx] = Color3.fromHex(themeData)
 
 					if Options[idx] then
+						Options[idx].Rainbow = false
 						Options[idx]:SetValueRGB(Color3.fromHex(themeData))
 					end
 				else
 					self.Library[idx] = Color3.fromHSV(themeData.hue, themeData.sat, themeData.vib)
 
 					if Options[idx] then
-						Options[idx].Rainbow = themeData.rainbow
+						Options[idx].Rainbow = not not themeData.rainbow
 						Options[idx]:SetValue({ themeData.hue, themeData.sat, themeData.vib }, themeData.transparency)
 					end
 				end
@@ -74778,11 +74764,15 @@ return LPH_NO_VIRTUALIZE(function()
 
 		function ThemeManager:ThemeUpdate()
 			-- This allows us to force apply themes without loading the themes tab :)
-			local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+			local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "GlowColor" }
 			for i, field in next, options do
 				if Options and Options[field] then
 					self.Library[field] = Options[field].Value
 				end
+			end
+
+			if Options and Options.GlowColor then
+				self.Library.GlowTransparency = Options.GlowColor.Transparency
 			end
 
 			self.Library.AccentColorDark = self.Library:GetDarkerColor(self.Library.AccentColor)
@@ -74824,6 +74814,7 @@ return LPH_NO_VIRTUALIZE(function()
 			groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.AccentColor })
 			groupbox:AddLabel("Outline color"):AddColorPicker("OutlineColor", { Default = self.Library.OutlineColor })
 			groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.FontColor })
+			groupbox:AddLabel("Glow color"):AddColorPicker("GlowColor", { Default = self.Library.GlowColor, Transparency = self.Library.GlowTransparency })
 
 			local ThemesArray = {}
 			for Name, Theme in next, self.BuiltInThemes do
@@ -74893,6 +74884,7 @@ return LPH_NO_VIRTUALIZE(function()
 			Options.AccentColor:OnChanged(UpdateTheme)
 			Options.OutlineColor:OnChanged(UpdateTheme)
 			Options.FontColor:OnChanged(UpdateTheme)
+			Options.GlowColor:OnChanged(UpdateTheme)
 		end
 
 		function ThemeManager:GetCustomTheme(file)
@@ -74917,7 +74909,7 @@ return LPH_NO_VIRTUALIZE(function()
 			end
 
 			local theme = {}
-			local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+			local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "GlowColor" }
 
 			for _, field in next, fields do
 				local option = Options[field]
